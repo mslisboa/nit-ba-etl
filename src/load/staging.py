@@ -33,9 +33,14 @@ logger = logging.getLogger(__name__)
 
 STAGING_SCHEMA = "staging"
 
-SCHEMA_DDL = sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
-    sql.Identifier(STAGING_SCHEMA)
-)
+# Verificação de existência: CREATE SCHEMA IF NOT EXISTS exige privilégio
+# CREATE no banco mesmo quando o schema já existe. O usuário do ETL tem
+# permissões limitadas (§6.2), então a existência é verificada antes da
+# criação, que só ocorre quando o schema realmente não existe.
+SCHEMA_EXISTS_SQL = sql.SQL(
+    "SELECT count(*) AS schema_count "
+    "FROM information_schema.schemata WHERE schema_name = {}"
+).format(sql.Literal(STAGING_SCHEMA))
 
 # Lotes de importação: proveniência de cada execução (architecture.md §9).
 IMPORT_BATCH_DDL = sql.SQL(
@@ -73,7 +78,6 @@ RAW_RECORDS_DDL = sql.SQL(
 ).format(sql.Identifier(STAGING_SCHEMA))
 
 STAGING_STATEMENTS: list[sql.Composable] = (
-    SCHEMA_DDL,
     IMPORT_BATCH_DDL,
     RAW_RECORDS_DDL,
 )
@@ -82,12 +86,27 @@ STAGING_STATEMENTS: list[sql.Composable] = (
 def setup_staging(conn: Connection) -> None:
     """Cria schema e tabelas de staging de forma idempotente.
 
-    Executa todas as ordenações em uma única transação (§5.4). Falha
+    O schema é criado somente se inexistente, por verificação explícita
+    (o usuário do ETL possui permissões limitadas — architecture.md §6.2
+    e §6.1). As tabelas usam CREATE TABLE IF NOT EXISTS, que não exige
+    privilégio adicional quando executadas pelo dono do schema. Falha
     em qualquer instrução reverte a operação completa e levanta
-    DatabaseError para classificação pelo pipeline chamador.
+    DatabaseError para classificação pelo pipeline chamador (§5.4, §10).
     """
     try:
         with transaction(conn):
+            schema_exists = conn.execute(SCHEMA_EXISTS_SQL).fetchone()[
+                "schema_count"
+            ] > 0
+            if not schema_exists:
+                # AUTHORIZATION CURRENT_USER garante que o schema fique
+                # sob o mesmo dono do role conectado, independente do
+                # provisioning do nit-ba-infra.
+                conn.execute(
+                    sql.SQL("CREATE SCHEMA {} AUTHORIZATION CURRENT_USER").format(
+                        sql.Identifier(STAGING_SCHEMA)
+                    )
+                )
             for statement in STAGING_STATEMENTS:
                 conn.execute(statement)
     except Exception as exc:
