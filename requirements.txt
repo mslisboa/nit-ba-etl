@@ -1,0 +1,5 @@
+# Dependências de runtime do ETL.
+# Fonte única de dependências do projeto (a lista do pyproject.toml
+# não é mantida; AGENTS.md §5: sem dependências desnecessárias).
+
+psycopg[binary]>=3.2,<4

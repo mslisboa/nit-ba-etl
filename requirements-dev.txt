@@ -1,0 +1,4 @@
+# Dependências de desenvolvimento (não entram na imagem Docker).
+-r requirements.txt
+
+pytest>=8,<9

@@ -1,0 +1,18 @@
+[project]
+name = "nit-ba-etl"
+version = "0.1.0"
+description = "ETL do módulo de integração estadual dos NITs da Bahia (Observatório de CT&I da Bahia)."
+readme = "README.md"
+requires-python = ">=3.12"
+# Dependências NÃO são gerenciadas aqui: a fonte única é
+# requirements.txt (runtime) e requirements-dev.txt (dev).
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = { find = { where = ["src"] } }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

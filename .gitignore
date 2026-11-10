@@ -1,0 +1,18 @@
+# Ambientes e cache Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Configuração local (AGENTS.md §5: não versionar .env)
+.env
+
+# Dados brutos e intermediários ficam FORA do repositório e da imagem
+# Docker (architecture.md §11); apenas fixtures sintéticas de teste
+# podem ser versionadas.
+data/raw/*
+data/staging/*
+data/processed/*
+!data/raw/demo/amostra.csv
