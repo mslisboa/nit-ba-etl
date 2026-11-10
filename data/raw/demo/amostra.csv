@@ -1,0 +1,4 @@
+nome,sigla,descricao
+NIT de Teste Anonimizado ALPHA,NTA,Amostra sintetica para validacao do esqueleto
+NIT de Teste Anonimizado BETA,,Registro invalido: sigla ausente (rejeicao esperada)
+

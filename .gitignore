@@ -11,8 +11,11 @@ __pycache__/
 
 # Dados brutos e intermediários ficam FORA do repositório e da imagem
 # Docker (architecture.md §11); apenas fixtures sintéticas de teste
-# podem ser versionadas.
+# podem ser versionadas. A negação exige que o diretório-pai não seja
+# excluído por glob (portanto a negação em dois níveis abaixo).
 data/raw/*
+!data/raw/demo
+data/raw/demo/*
+!data/raw/demo/amostra.csv
 data/staging/*
 data/processed/*
-!data/raw/demo/amostra.csv
