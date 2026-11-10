@@ -1,0 +1,20 @@
+# Dados ficam fora da imagem (architecture.md §11), montados por volume.
+data/
+
+# Configuração local nunca entra na imagem (AGENTS.md §5).
+.env
+
+# Ambiente de desenvolvimento e caches
+.venv/
+tests/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+docs/
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+README.md
